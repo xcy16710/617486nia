@@ -1,31 +1,274 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的免费网站</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>情人节网站</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        header { text-align: center; padding: 20px; background: #f0f0f0; }
-        section { margin: 20px 0; }
-        footer { text-align: center; margin-top: 40px; color: #666; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://via.placeholder.com/1500x800?text=%E6%9C%A8%E9%A9%AC') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+        }
+
+        .header {
+            text-align: center;
+            padding: 80px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            margin-top: 50px;
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            color: #FF66B2;
+            font-family: 'Dancing Script', cursive;
+            margin: 0;
+        }
+
+        .header p {
+            font-size: 1.5rem;
+            color: #6a4c9c;
+            margin-top: 10px;
+        }
+
+        .timeline {
+            padding: 50px;
+            background-color: rgba(255, 255, 255, 0.8);
+            margin-top: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline h2 {
+            text-align: center;
+            color: #FF66B2;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+
+        .timeline ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .timeline li {
+            display: flex;
+            justify-content: space-between;
+            padding: 25px;
+            border-bottom: 2px solid #f3f3f3;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .timeline li:last-child {
+            border-bottom: none;
+        }
+
+        .timeline li .date {
+            font-size: 1.3rem;
+            color: #6a4c9c;
+        }
+
+        .timeline li .event {
+            font-size: 1.4rem;
+            color: #6a4c9c;
+        }
+
+        .photo-wall {
+            padding: 50px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .photo-wall h2 {
+            text-align: center;
+            color: #FF66B2;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .photo-grid img {
+            width: 100%;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .photo-grid img:hover {
+            transform: scale(1.05);
+        }
+
+        .post-its {
+            padding: 50px;
+            background-color: rgba(255, 255, 255, 0.8);
+            margin-top: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-its h2 {
+            text-align: center;
+            color: #FF66B2;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+
+        .note {
+            display: inline-block;
+            margin: 10px;
+            background-color: #FFCCFF;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 200px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .note:hover {
+            background-color: #FF99CC;
+        }
+
+        .note input {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            font-size: 1.1rem;
+            color: #6a4c9c;
+        }
+
+        /* 烟花效果 */
+        .firework {
+            position: absolute;
+            pointer-events: none;
+            z-index: 9999;
+            border-radius: 50%;
+            background-color: rgba(255, 102, 178, 0.8);
+            opacity: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: rgba(255, 102, 178, 0.8);
+            border-radius: 50%;
+            animation: explode 1s forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 1.3rem;
+            color: #6a4c9c;
+        }
+
     </style>
 </head>
 <body>
-    <header>
-        <h1>欢迎来到我的网站</h1>
-        <p>这是用GitHub Pages免费部署的网站</p>
-    </header>
-    <section>
-        <h2>关于我</h2>
-        <p>你可以在这里修改成自己的内容</p>
-    </section>
-    <section>
-        <h2>联系方式</h2>
-        <p>邮箱：your@email.com</p>
-    </section>
-    <footer>
-        <p>© 2026 我的免费网站 - 所有权利保留</p>
-    </footer>
+
+<!-- 首页 -->
+<div class="header">
+    <h1>Rocking Horse & Enzyme</h1>
+    <p>我们的情人节故事</p>
+</div>
+
+<!-- 时间轴 -->
+<div class="timeline">
+    <h2>我们的纪念日</h2>
+    <ul>
+        <li>
+            <div class="date">2021年6月1日</div>
+            <div class="event">第一次见面</div>
+        </li>
+        <li>
+            <div class="date">2022年2月14日</div>
+            <div class="event">第一次约会</div>
+        </li>
+        <li>
+            <div class="date">2023年5月10日</div>
+            <div class="event">订婚</div>
+        </li>
+    </ul>
+</div>
+
+<!-- 照片墙 -->
+<div class="photo-wall">
+    <h2>我们的回忆</h2>
+    <div class="photo-grid">
+        <img src="https://via.placeholder.com/250x250?text=%E5%90%8C%E6%97%8F%E5%9B%BE%E7%89%871" alt="照片1">
+        <img src="https://via.placeholder.com/250x250?text=%E5%90%8C%E6%97%8F%E5%9B%BE%E7%89%872" alt="照片2">
+        <img src="https://via.placeholder.com/250x250?text=%E5%90%8C%E6%97%8F%E5%9B%BE%E7%89%873" alt="照片3">
+    </div>
+</div>
+
+<!-- 便利贴 -->
+<div class="post-its">
+    <h2>给你的便利贴</h2>
+    <div class="note">
+        <input type="text" placeholder="写下你的心情...">
+    </div>
+    <div class="note">
+        <input type="text" placeholder="写下你的心情...">
+    </div>
+</div>
+
+<!-- 底部 -->
+<footer>
+    <p>情人节快乐！感谢你一路相伴。</p>
+</footer>
+
+<script>
+    // 监听鼠标点击，发射爱心烟花
+    document.body.addEventListener('click', function(e) {
+        let firework = document.createElement('div');
+        firework.classList.add('firework');
+        firework.style.left = e.pageX + 'px';
+        firework.style.top = e.pageY + 'px';
+        document.body.appendChild(firework);
+
+        let particles = 30;  // 粒子数量
+        for (let i = 0; i < particles; i++) {
+            let particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.style.left = `${Math.random() * 50 - 25}px`;
+            particle.style.top = `${Math.random() * 50 - 25}px`;
+            firework.appendChild(particle);
+        }
+
+        // 动画结束后移除烟花
+        setTimeout(function() {
+            firework.remove();
+        }, 1000);
+    });
+</script>
+
 </body>
 </html>
