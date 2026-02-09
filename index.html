@@ -31,7 +31,7 @@
             scroll-padding-top: 80px; /* 与导航栏高度匹配，避免内容被导航栏遮挡 */
         }
 
-        /* 顶部导航栏 - iOS液态玻璃毛玻璃效果 */
+        /* 顶部导航栏 - 更通透的iOS液态玻璃毛玻璃效果 */
         .navbar {
             width: 100%;
             padding: 20px 50px;
@@ -40,13 +40,16 @@
             align-items: center;
             position: fixed;
             top: 0;
-            background: rgba(255, 255, 255, 0.6);
+            /* 关键修改1：大幅降低背景不透明度，从0.6改为0.2，更通透 */
+            background: rgba(255, 255, 255, 0.2);
+            /* 关键修改2：增加模糊值，从20px改为30px，增强毛玻璃质感 */
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(25px);
             box-shadow: 
-                0 1px 2px rgba(0, 0, 0, 0.02),
-                0 8px 16px rgba(0, 0, 0, 0.03);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+                0 1px 2px rgba(0, 0, 0, 0.01), /* 降低阴影不透明度，更轻盈 */
+                0 8px 16px rgba(0, 0, 0, 0.02);
+            /* 关键修改3：降低边框不透明度，从0.8改为0.4，更通透 */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
             z-index: 100;
             transition: all 0.3s ease;
             height: 80px; /* 固定导航栏高度，用于scroll-padding-top匹配 */
@@ -57,7 +60,7 @@
             color: #4a3b66;
             font-weight: bold;
             letter-spacing: 1px;
-            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.95); /* 增强文字阴影，保证可读性 */
             text-decoration: none;
             display: inline-block;
         }
@@ -77,18 +80,16 @@
             color: #4a3b66;
             font-size: 16px;
             transition: color 0.3s;
-            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.95); /* 增强文字阴影，保证可读性 */
         }
 
         .nav-links a:hover {
             color: #e29bc6;
         }
 
-        /* 封面区域 - 关键修改：替换背景图路径 */
         .hero {
             width: 100%;
             height: 100vh;
-            /* 这里替换成你的本地图片路径，注意文件名和格式要一致 */
             background: url('images/hero-bg.png') no-repeat center center/cover;
             display: flex;
             flex-direction: column;
@@ -195,6 +196,27 @@
             margin-top: 10px;
             font-size: 14px;
         }
+
+        /* ========== 新增：爱心飘起效果样式 ========== */
+        .heart {
+            position: absolute;
+            color: #e29bc6; /* 匹配网页粉色系 */
+            font-size: 20px;
+            animation: heartFloat 1.5s ease-out forwards;
+            pointer-events: none; /* 避免遮挡点击事件 */
+            z-index: 999; /* 确保爱心在最上层显示 */
+        }
+
+        @keyframes heartFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(0, -100px) scale(1.8);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -265,6 +287,53 @@
                     }
                 });
             });
+
+            // ========== 新增：爱心飘起效果逻辑 ==========
+            // 监听页面点击事件
+            document.body.addEventListener('click', function(e) {
+                // 排除导航栏点击（避免导航栏点击也生成爱心）
+                if (e.target.closest('.navbar')) return;
+                
+                // 随机生成4~6颗爱心
+                const heartCount = Math.floor(Math.random() * 3) + 4;
+                
+                // 循环创建爱心
+                for (let i = 0; i < heartCount; i++) {
+                    // 修复：传入完整的点击坐标（包含滚动距离）
+                    createHeart(e.clientX, e.clientY + window.pageYOffset);
+                }
+            });
+
+            // 创建单个爱心的函数
+            function createHeart(x, y) {
+                // 创建爱心元素
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerText = '♥';
+                
+                // 随机偏移爱心位置（以点击位置为中心，左右±20px）
+                const randomX = x + (Math.random() - 0.5) * 40;
+                const randomY = y + (Math.random() - 0.5) * 20;
+                
+                // 设置爱心初始位置（使用pageX/pageY的逻辑，兼容滚动）
+                heart.style.left = `${randomX}px`;
+                heart.style.top = `${randomY}px`;
+                
+                // 随机调整爱心颜色（匹配网页粉色系）
+                const hue = 340 + Math.random() * 20; 
+                heart.style.color = `hsl(${hue}, 80%, 60%)`;
+                
+                // 随机调整动画时长（1-2秒）
+                heart.style.animationDuration = `${1 + Math.random()}s`;
+
+                // 添加到页面
+                document.body.appendChild(heart);
+
+                // 动画结束后移除爱心元素，避免占用内存
+                setTimeout(() => {
+                    heart.remove();
+                }, 2000);
+            }
         });
     </script>
 </body>
