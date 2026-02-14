@@ -3,264 +3,1199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loading Love</title>
+    <title>Rocking Horse & Enzyme</title>
     <style>
-        /* 页面整体样式 */
-        body {
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f9d1e6; /* 基础粉底色 */
-            background-image: linear-gradient(135deg, #f9d1e6 0%, #c0a0e0 100%);
+            box-sizing: border-box;
+            font-family: 'Georgia', serif;
+        }
+
+        /* ========== 新增：Loading动画样式 ========== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #fdf6f9;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            font-family: Georgia, 'Times New Roman', Times, serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            background-size: 200% 200%;
-            animation: gradientShift 15s ease infinite;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            cursor: pointer; /* 鼠标指针变为点击样式 */
-            overflow: hidden; /* 隐藏溢出的烟花 */
+            z-index: 9999; /* 最高层级，覆盖所有内容 */
+            transition: opacity 0.5s ease-out;
         }
 
-        /* 主容器 - 增加轻微浮动动画 */
-        .loading-container {
-            animation: float 6s ease-in-out infinite;
-            position: relative;
-            text-align: center; /* 让文字居中 */
-        }
-
-        /* 主文本样式 */
         .loading-text {
-            font-size: 52px;
-            background: linear-gradient(45deg, #7d40a6, #5a2d81);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-weight: 600;
-            letter-spacing: 4px;
-            font-family: 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', Times, serif;
-            text-shadow: 0 2px 10px rgba(106, 53, 156, 0.15);
-            position: relative;
-            display: inline-block;
-        }
-
-        /* 文字伪元素 - 增加描边质感 */
-        .loading-text::after {
-            content: "Loading Love";
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: none;
-            -webkit-text-stroke: 0.5px #8b5fb8;
-            color: transparent;
-            z-index: -1;
-        }
-
-        /* 副标题样式 */
-        .sub-text {
-            font-size: 18px;
-            color: #8b5fb8;
+            font-size: 36px;
+            color: #4a3b66;
             letter-spacing: 2px;
-            margin-top: 15px;
-            font-family: "Microsoft YaHei", Georgia, serif;
-            opacity: 0.8;
-            /* 轻微的呼吸动画 */
-            animation: subBreathe 3s ease-in-out infinite;
-        }
-
-        /* 省略号容器 */
-        .dots {
-            display: inline-block;
-            margin-left: 12px;
             position: relative;
-            top: 2px;
         }
 
-        /* 单个省略号样式 */
-        .dot {
+        /* 省略号逐个出现/消失的动画 */
+        .loading-dots {
             display: inline-block;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #8b5fb8, #6a359c);
-            margin: 0 6px;
-            animation: 
-                rotateDot 2s ease-in-out infinite,
-                breathe 2s ease-in-out infinite,
-                bounce 2s ease-in-out infinite;
-            box-shadow: 0 3px 8px rgba(106, 53, 156, 0.3);
+            width: 45px;
+            text-align: left;
         }
 
-        /* 每个点点的动画延迟错开 */
-        .dot:nth-child(2) {
-            animation-delay: 0.4s, 0.2s, 0.4s;
-        }
-
-        .dot:nth-child(3) {
-            animation-delay: 0.8s, 0.4s, 0.8s;
-        }
-
-        /* 爱心烟花样式 */
-        .heart {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(45deg, #ff6b9e, #7d40a6);
-            transform: rotate(45deg);
-            animation: heartBurst 1.5s ease-out forwards;
+        .loading-dots span {
             opacity: 0;
-            pointer-events: none;
-            box-shadow: 0 2px 10px rgba(255, 107, 158, 0.5);
+            animation: dotFade 1s infinite ease-in-out;
+            display: inline-block;
+            width: 8px;
         }
 
-        /* 爱心伪元素（补全爱心形状） */
-        .heart::before,
-        .heart::after {
+        .loading-dots span:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotFade {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* 核心：自定义文字选中样式 */
+        ::selection {
+            background-color: #f9d9e8; 
+            color: #4a3b66; 
+        }
+        ::-moz-selection {
+            background-color: #f9d9e8;
+            color: #4a3b66;
+        }
+
+        /* 全局背景改为爱心花纹图 */
+        body {
+            /* 1. 背景图 + 兜底颜色（图加载失败/裁切处显示） */
+            background: url('images/main-bg.png') #fff8fa no-repeat center center fixed;
+            /* 2. 铺满全屏，保持比例（cover），兼容所有设备 */
+            background-size: cover;
+            -webkit-background-size: cover; /* 兼容iOS老版本 */
+            -moz-background-size: cover;    /* 兼容Firefox老版本 */
+            -o-background-size: cover;      /* 兼容Opera老版本 */
+            /* 3. 基础样式保留 */
+            overflow-x: hidden; /* 只隐藏横向滚动，纵向保留全局滚动 */
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+            /* 4. 确保移动端高度铺满 */
+            min-height: 100vh;
+        }
+
+        /* 顶部导航栏 - 液态玻璃毛玻璃效果 */
+        .navbar {
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 
+                0 1px 2px rgba(0, 0, 0, 0.01),
+                0 8px 16px rgba(0, 0, 0, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            z-index: 100;
+            transition: all 0.3s ease;
+            height: 80px;
+            /* 适配移动端导航栏 padding */
+            padding: 20px 20px;
+        }
+
+        .navbar .logo a {
+            font-size: 22px;
+            color: #4a3b66;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.95);
+            text-decoration: none;
+            display: inline-block;
+            /* 移动端字号缩小 */
+            font-size: 18px;
+        }
+
+        .navbar .logo a:hover {
+            color: #e29bc6;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            /* 移动端间距缩小 */
+            gap: 20px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #4a3b66;
+            font-size: 16px;
+            transition: color 0.3s;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.95);
+            /* 移动端字号缩小 */
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            color: #e29bc6;
+        }
+
+        .hero {
+            width: 100%;
+            height: 100vh; /* 强制全屏高度，不会减半 */
+            min-height: 100vh; /* 兜底，防止移动端高度不足 */
+            background: url('images/hero-bg.png') no-repeat center center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-top: 80px;
+            position: relative;
+            background-color: transparent;
+            overflow: visible; /* 确保渐变层不会挤压封面高度 */
+        }
+
+        /* 底部透明渐变（不影响封面高度） */
+        .hero::after {
             content: '';
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background: inherit;
-            border-radius: 50%;
-        }
-
-        .heart::before {
-            top: -10px;
+            bottom: 0;
             left: 0;
+            width: 100%;
+            height: 300px; /* 降低渐变高度，避免覆盖过多内容 */
+            /* 渐变：从封面底部向上→透明→淡粉→透明（只在底部） */
+            background: linear-gradient(to top,
+                rgba(255, 248, 250, 0.6) 0%,  /* 最底部：淡粉（可见渐变） */
+                rgba(255, 248, 250, 0) 100%   /* 向上渐变到完全透明 */
+            );
+            pointer-events: none;
+            z-index: 1; /* 层级正确，不挤压封面 */
         }
 
-        .heart::after {
+        .hero::before {
+            content: '';
+            position: absolute;
             top: 0;
-            left: -10px;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 10; /* 确保内容在最上层 */
+            /* 移动端内容内边距 */
+            padding: 0 20px;
         }
 
-        /* 动画定义 */
-        @keyframes rotateDot {
-            0% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(180deg) scale(1.1); }
-            100% { transform: rotate(360deg) scale(1); }
+        .hero h1 {
+            font-size: 68px;
+            color: #4a3b66;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+            /* 移动端字号适配 */
+            font-size: clamp(32px, 8vw, 68px);
         }
 
-        @keyframes breathe {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
+        .hero .subtitle {
+            font-size: 18px;
+            color: #8b7d9c;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+            /* 移动端字号缩小 */
+            font-size: 14px;
         }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+        .hero .quote {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 30px 50px;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 18px;
+            color: #4a3b66;
+            line-height: 1.6;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            /* 移动端适配 */
+            padding: 20px 20px;
+            max-width: 90%;
+            font-size: 16px;
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 40px;
+            color: #4a3b66;
+            font-size: 14px;
+            letter-spacing: 1px;
+            animation: bounce 2s infinite;
+            z-index: 20;
         }
 
         @keyframes bounce {
-            0% { transform: translateY(0px) rotate(0deg) scale(1); }
-            50% { transform: translateY(-4px) rotate(180deg) scale(1.1); }
-            100% { transform: translateY(0px) rotate(360deg) scale(1); }
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes subBreathe {
-            0% { opacity: 0.7; }
-            50% { opacity: 0.9; }
-            100% { opacity: 0.7; }
-        }
-
-        @keyframes heartBurst {
-            0% {
-                opacity: 1;
-                transform: rotate(45deg) scale(0);
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
             }
-            20% {
-                transform: rotate(45deg) scale(1.2);
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* ========== 核心修改：时光轴样式（改为流式布局） ========== */
+        .timeline-section {
+            width: 100%;
+            padding: 100px 20px 100px 20px; /* 调整内边距，移除超大min-height */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: transparent;
+            position: relative;
+            /* 关键：移除overflow-y，取消嵌套滚动 */
+            overflow: visible;
+            /* 关键：取消超大高度，让内容自然撑开 */
+            min-height: auto;
+        }
+
+        /* 时光轴副标题样式 */
+        .timeline-title {
+            font-size: 42px;
+            color: #4a3b66;
+            letter-spacing: 2px;
+            margin-bottom: 80px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
+            font-size: clamp(28px, 6vw, 42px);
+            position: relative;
+            z-index: 20;
+        }
+
+        /* 时间轴竖线 - 改为固定高度，跟随卡片流动 */
+        .timeline-center {
+            position: absolute;
+            top: 180px; /* 标题下方开始 */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            background: linear-gradient(to bottom, #e29bc6, #f9d9e8, #e29bc6);
+            border-radius: 2px;
+            z-index: 5;
+            /* 关键：改为动态高度，覆盖所有卡片 */
+            height: calc(100% - 200px);
+        }
+
+        /* 时间轴底部箭头 */
+        .timeline-center::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #e29bc6;
+        }
+
+        /* 核心修改：时间轴容器改为流式布局 */
+        .timeline-container {
+            position: relative; /* 改为relative，跟随页面流动 */
+            width: 100%;
+            max-width: 1200px; /* 限制最大宽度 */
+            margin: 0 auto;
+            /* 关键：移除absolute定位和固定高度 */
+            top: auto;
+            left: auto;
+            height: auto;
+            padding: 0;
+            z-index: 10;
+            /* 使用网格布局排列卡片 */
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 两列布局 */
+            gap: 60px 0; /* 上下间距60px，左右0 */
+        }
+
+        /* 时间轴卡片通用样式 - 流式布局适配 */
+        .timeline-card {
+            position: relative; /* 改为relative */
+            width: 300px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            color: #4a3b66;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 1;
+            transform: translateY(0);
+            animation: cardFadeIn 0.8s ease-out forwards;
+            /* 居中对齐 */
+            margin: 0 auto;
+            /* 移除inline-block */
+            display: block;
+        }
+
+        /* 卡片渐入动画 */
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 修复：卡片悬停效果（阴影+放大） */
+        .timeline-card:hover {
+            transform: scale(1.08); /* 放大效果 */
+            box-shadow: 0 12px 30px rgba(226, 155, 198, 0.25); /* 增强阴影 */
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* 卡片时间样式 */
+        .card-time {
+            font-size: 14px;
+            color: #e29bc6;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        /* 卡片内容样式 */
+        .card-content {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #4a3b66;
+        }
+
+        /* 修复：nia! 文字动画样式（增加层级和定位） */
+        .nia-text {
+            position: fixed; /* 改为fixed避免滚动偏移 */
+            font-size: 24px;
+            color: #e29bc6;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+            z-index: 9999;
+            animation: niaFloat 1s ease-out forwards;
+            transform: translate(-50%, -50%); /* 居中到点击位置 */
+        }
+
+        @keyframes niaFloat {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
             }
             100% {
+                transform: translate(-50%, -100px) scale(1.2);
                 opacity: 0;
-                transform: rotate(45deg) scale(0) translate(var(--x), var(--y));
             }
+        }
+
+        /* 移动端适配 - 流式布局适配 */
+        @media (max-width: 768px) {
+            /* 移动端改为单列布局 */
+            .timeline-container {
+                grid-template-columns: 1fr;
+                gap: 40px 0;
+            }
+            
+            .timeline-card {
+                width: 80%;
+                margin: 0 auto;
+            }
+            
+            .timeline-center {
+                top: 150px;
+                height: calc(100% - 180px);
+            }
+            
+            .timeline-section {
+                padding: 80px 20px 80px 20px;
+            }
+            
+            .timeline-title {
+                margin-bottom: 60px;
+            }
+        }
+
+        /* 其他内容区域样式 */
+        .section {
+            width: 100%;
+            min-height: 100vh;
+            padding: 100px 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #4a3b66;
+            /* 内容区背景透明，继承body的爱心花纹 */
+            background-color: transparent;
+            /* 移动端内边距适配 */
+            padding: 80px 20px;
+            font-size: clamp(18px, 4vw, 24px);
+        }
+
+        /* ========== 新增：告白墙样式 ========== */
+        .confession-wall {
+            width: 100%;
+            max-width: 800px;
+            background: url('images/paper-bg.png') #fff no-repeat center center;
+            background-size: cover;
+            padding: 60px 40px;
+            border-radius: 8px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .confession-wall::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: url('images/seal.png') no-repeat center center;
+            background-size: contain;
+            opacity: 0.8;
+        }
+
+        .confession-title {
+            font-size: 32px;
+            color: #4a3b66;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+
+        .confession-content {
+            /* 字体设置：英文优先Times New Roman，中文用Georgia，兜底用衬线字体 */
+            font-family: "Times New Roman", Georgia, serif;
+            
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+            text-indent: 8em !important;
+            white-space: pre-line;
+        }
+
+        /* ========== 新增：便利贴样式 ========== */
+        .notes-section {
+            width: 100%;
+            min-height: 100vh;
+            padding: 80px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            background-color: transparent;
+        }
+
+        /* 便利贴副标题样式 */
+        .notes-title {
+            font-size: 42px;
+            color: #4a3b66;
+            letter-spacing: 2px;
+            margin-bottom: 50px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
+            font-size: clamp(28px, 6vw, 42px);
+            width: 100%; /* 独占一行 */
+        }
+
+        .sticky-note {
+            width: 280px;
+            height: 280px;
+            padding: 30px 20px 20px;
+            position: relative;
+            border-radius: 4px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            transform: rotate(var(--rotate, 0deg));
+        }
+
+        /* 多巴胺配色（新增2个便利贴的样式） */
+        .sticky-note:nth-child(1) {
+            background-color: #ff6b6b;
+            --rotate: -2deg;
+        }
+        .sticky-note:nth-child(2) {
+            background-color: #4ecdc4;
+            --rotate: 3deg;
+        }
+        .sticky-note:nth-child(3) {
+            background-color: #eebf48;
+            --rotate: -4deg;
+        }
+        .sticky-note:nth-child(4) {
+            background-color: #9d80fe;
+            --rotate: -2.5deg;
+        }
+        .sticky-note:nth-child(5) {
+            background-color: #ff8a80;
+            --rotate: -1deg;
+        }
+        .sticky-note:nth-child(6) {
+            background-color: #69b3a2;
+            --rotate: 5deg;
+        }
+        .sticky-note:nth-child(7) {
+            background-color: #f08080;
+            --rotate: 1deg;
+        }
+        .sticky-note:nth-child(8) {
+            background-color: #e376d4;
+            --rotate: -2deg;
+        }
+        .sticky-note:nth-child(9) {
+            background-color: #76dee3;
+            --rotate: 4deg;
+        }
+
+        /* 图钉样式 */
+        .sticky-note::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background-color: #777;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        /* 便利贴悬停效果 */
+        .sticky-note:hover {
+            transform: rotate(var(--rotate, 0deg)) scale(1.08);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .sticky-content {
+            color: #fff;
+            font-size: 16px;
+            line-height: 1.6;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 页脚样式 */
+        .footer {
+            background-color: #f9d9e820;
+            padding: 40px 0;
+            text-align: center;
+            color: #8b7d9c;
+            font-size: 16px;
+            border-top: 1px solid #f9d9e880;
+            /* 移动端适配 */
+            padding: 30px 20px;
+            font-size: 14px;
+        }
+        .footer .heart {
+            color: #e29bc6;
+            font-size: 18px;
+            margin: 0 5px;
+        }
+        .footer .copyright {
+            margin-top: 10px;
+            font-size: 14px;
+            /* 移动端字号缩小 */
+            font-size: 12px;
+        }
+
+        /* 爱心飘起效果样式 */
+        .heart {
+            position: absolute;
+            color: #e29bc6;
+            font-size: 20px;
+            animation: heartFloat 1.5s ease-out forwards;
+            pointer-events: none;
+            z-index: 999;
+            /* 移动端爱心大小适配 */
+            font-size: 16px;
+        }
+
+        @keyframes heartFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(0, -100px) scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        /* 花束飞过效果样式（修复版：整合浮动+飞行） */
+        .flying-flower {
+            position: fixed;
+            width: 120px;
+            height: auto;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.9;
+            transition: opacity 1s ease-out;
+            /* 移动端花束大小适配 */
+            width: clamp(80px, 15vw, 120px);
+        }
+
+        /* 斜向左到右飞行 + 浮动（整合版） */
+        @keyframes flyLeftToRight {
+            0% {
+                transform: translateX(-150%) translateY(0) rotate(0deg) scale(var(--scale));
+                opacity: 0;
+            }
+            25% {
+                transform: translateX(calc(25vw - 60px)) translateY(calc(var(--y-offset) / 2 - 10px)) rotate(10deg) scale(var(--scale));
+                opacity: 0.9;
+            }
+            50% {
+                transform: translateX(calc(50vw - 60px)) translateY(var(--y-offset)) rotate(15deg) scale(var(--scale));
+                opacity: 0.9;
+            }
+            75% {
+                transform: translateX(calc(75vw - 60px)) translateY(calc(var(--y-offset) / 2 + 10px)) rotate(10deg) scale(var(--scale));
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateX(calc(100vw + 150%)) translateY(0) rotate(15deg) scale(var(--scale));
+                opacity: 0;
+            }
+        }
+
+        /* 斜向右到左飞行 + 浮动（整合版） */
+        @keyframes flyRightToLeft {
+            0% {
+                transform: translateX(calc(100vw + 150%)) translateY(0) rotate(0deg) scale(var(--scale));
+                opacity: 0;
+            }
+            25% {
+                transform: translateX(calc(75vw - 60px)) translateY(calc(var(--y-offset) / 2 - 10px)) rotate(-10deg) scale(var(--scale));
+                opacity: 0.9;
+            }
+            50% {
+                transform: translateX(calc(50vw - 60px)) translateY(var(--y-offset)) rotate(-15deg) scale(var(--scale));
+                opacity: 0.9;
+            }
+            75% {
+                transform: translateX(calc(25vw - 60px)) translateY(calc(var(--y-offset) / 2 + 10px)) rotate(-10deg) scale(var(--scale));
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateX(-150%) translateY(0) rotate(-15deg) scale(var(--scale));
+                opacity: 0;
+            }
+        }
+        .custom-text1 {
+            /* 字体设置：英文优先Times New Roman，中文用Georgia，兜底用衬线字体 */
+            font-family: "Times New Roman", Georgia, serif;
+            /* 文本右对齐 */
+            text-align: right;
+            margin: 20px auto;
+        }
+        .custom-text2 {
+            /* 字体设置：英文优先Times New Roman，中文用Georgia，兜底用衬线字体 */
+            font-family: "Times New Roman", Georgia, serif;
+            /* 缩进 */
+            text-indent: 8em;
         }
     </style>
 </head>
 <body>
-    <div class="loading-container">
+    <!-- ========== 新增：Loading动画容器 ========== -->
+    <div class="loading-screen">
         <div class="loading-text">
-            Loading Love
-            <span class="dots">
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
+            Loading love
+            <span class="loading-dots">
+                <span>.</span><span>.</span><span>.</span>
             </span>
         </div>
-        <!-- 新增副标题 -->
-        <div class="sub-text">木马正在准备浪漫中（试试点击屏幕！）</div>
     </div>
 
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="#hero-section">Rocking Horse & Enzyme</a>
+        </div>
+        <div class="nav-links">
+            <a href="#timeline">时光轴</a>
+            <a href="#bridge">爱心桥</a>
+            <a href="#confession">告白墙</a>
+            <a href="#notes">便利贴</a>
+        </div>
+    </nav>
+
+    <!-- 封面区域 -->
+    <section id="hero-section" class="hero">
+        <div class="hero-content">
+            <h1>Rocking Horse <br>& Enzyme</h1>
+            <p class="subtitle">HAPPY VALENTINE'S DAY and HAPPY EVERYDAY</p>
+            <div class="quote">
+                『祝我永远永远最爱最爱的酶酶宝宝情人节快乐呀，<br>要天天浸润在幸福里哟！』
+            </div>
+        </div>
+        <div class="scroll-down">﹀SCROLL DOWN﹀</div>
+    </section>
+
+    <!-- ========== 核心修改：时光轴区域（流式布局） ========== -->
+    <section id="timeline" class="timeline-section">
+        <!-- 时光轴副标题 -->
+        <h2 class="timeline-title">我们的时光</h2>
+        
+        <!-- 时间轴竖线主体 -->
+        <div class="timeline-center"></div>
+        
+        <!-- 时间轴卡片容器（流式布局） -->
+        <div class="timeline-container">
+            <!-- 卡片1 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 0.1s;">
+                <div class="card-time">2025.08.31</div>
+                <div class="card-content">新学期报道，这是我们的第一次相遇，我们从陌生人成为了同桌</div>
+            </div>
+            <!-- 卡片2 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 0.2s;">
+                <div class="card-time">2025.09.xx</div>
+                <div class="card-content">“木马”一词诞生，“木马”实物出现</div>
+            </div>
+            <!-- 卡片3 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 0.3s;">
+                <div class="card-time">2025.09.xx</div>
+                <div class="card-content">一个爆笑的晚自习，在我们班当时的氛围里格格不入（超级喜欢哦）</div>
+            </div>
+            <!-- 卡片4 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 0.4s;">
+                <div class="card-time">2025.09.xx</div>
+                <div class="card-content">酶酶给木马拍的第一张照片</div>
+            </div>
+            <!-- 卡片5 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 0.5s;">
+                <div class="card-time">2025.09.xx</div>
+                <div class="card-content">木马给酶酶拍的第一张照片</div>
+            </div>
+            <!-- 卡片6 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 0.6s;">
+                <div class="card-time">2025.09.xx</div>
+                <div class="card-content">酶酶和木马拍的第一张合照哦，木马当时还很腼腆其实（）</div>
+            </div>
+            <!-- 卡片7 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 0.7s;"> 
+                <div class="card-time">2025.09.30</div>
+                <div class="card-content">酶酶和木马去玩了密室！被抽到一起去做单线哦，结束的时候木马说要陪宝宝一起走回去，戳中了宝宝的心哦</div>
+            </div>
+            <!-- 卡片8 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 0.8s;">
+                <div class="card-time">2025.10.xx</div>
+                <div class="card-content">宝宝第一次给木马送花！</div>
+            </div>
+            <!-- 卡片9 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 0.9s;">
+                <div class="card-time">2025.10.30</div>
+                <div class="card-content">运动会 Day1 哦，木马成为了宝宝的摄影师呢</div>
+            </div>
+            <!-- 卡片10 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 1.0s;">
+                <div class="card-time">2025.11.xx</div>
+                <div class="card-content">第一次牵手（木马强制哦好可怕）（具体是哪天呀，翻翻共享相册确认一下哦）</div>
+            </div>
+            <!-- 卡片11 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 1.1s;">
+                <div class="card-time">2025.11.13</div>
+                <div class="card-content">秋假第一天！（在此之前开始了“拼贴”）第一次和宝宝单独出去哦，抽背了很多，也touch了很多呢</div>
+            </div>
+            <!-- 卡片12 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 1.2s;">
+                <div class="card-time">2025.11.21</div>
+                <div class="card-content">运动会 Day2，晚上被推动情节发展了，木马：倒霉的一天；宝宝：假的哦</div>
+            </div>
+            <!-- 卡片13 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 1.3s;">
+                <div class="card-time">2025.11.22</div>
+                <div class="card-content">第一次拥抱，第一次一起坐地铁呀❤</div>
+            </div>
+            <!-- 卡片14 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 1.4s;">
+                <div class="card-time">2025.11.30</div>
+                <div class="card-content">Zootopia2！木马说出了三个字哦（      ）</div>
+            </div>
+            <!-- 卡片15 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 1.5s;">
+                <div class="card-time">2025.12.02</div>
+                <div class="card-content">Stage2 开始，终于可以大大方方的表达爱啦</div>
+            </div>
+            <!-- 新增卡片16 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 1.6s;">
+                <div class="card-time">2025.12.03</div>
+                <div class="card-content">第一次亲嘴哦，但是好ws好informal好不满意好（）呀，也许这就是青春吧，不完美哦</div>
+            </div>
+            <!-- 新增卡片17 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 1.7s;">
+                <div class="card-time">2025.12.04</div>
+                <div class="card-content">木马中午的时候去找wlt了，让宝宝难受生气，于是木马开始安慰宝宝，木马第一次在宝宝面前因为宝宝而落泪</div>
+            </div>
+            <!-- 新增卡片18 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 1.8s;">
+                <div class="card-time">2025.12.08</div>
+                <div class="card-content">Day99 哦，但是座位被分开了www，开始了异地恋，接下来的一个月疯狂写本子</div>
+            </div>
+            <!-- 新增卡片19 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 1.9s;">
+                <div class="card-time">2025.12.xx</div>
+                <div class="card-content">去宝宝的小区里抱抱了呀</div>
+            </div>
+            <!-- 新增卡片20 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 2.0s;">
+                <div class="card-time">2025.12.xx</div>
+                <div class="card-content">木马第一次给宝宝送花！</div>
+            </div>
+            <!-- 新增卡片21 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 2.1s;">
+                <div class="card-time">2025?</div>
+                <div class="card-content">搬到实验室去上课，陪宝宝收东西，和宝宝在黑黑的学校里面抱抱！</div>
+            </div>
+            <!-- 新增卡片22 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 2.2s;">
+                <div class="card-time">2025.12.25</div>
+                <div class="card-content">一个不完美的惹宝宝生气的也是第一个圣诞节，让木马在bf方面成长了很多</div>
+            </div>
+            <!-- 新增卡片23 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 2.3s;">
+                <div class="card-time">2025.12.29</div>
+                <div class="card-content">木马的生日哦！收到了宝宝精心准备的超级多礼物呢！</div>
+            </div>
+            <!-- 新增卡片24 - 右侧 -->
+            <div class="timeline-card" style="animation-delay: 2.4s;">
+                <div class="card-time">2025.12.31</div>
+                <div class="card-content">陪宝宝跨年！拿到了陌生人的玫瑰花，木马回家家很晚哦被骂了嘿嘿（2026还有好多要写！！！没时间了后面补吧好不好呀：期末考试，帮宝宝搬书；第一次去家里面/家旁边；township的周末；第二次一起和别人出去玩，木马犯公主病了哦，然后又回家超级晚；陪宝宝逛东郊记忆！；到校自习；etc）</div>
+            </div>
+            <!-- 新增卡片25 - 左侧 -->
+            <div class="timeline-card" style="animation-delay: 2.5s;">
+                <div class="card-time">future</div>
+                <div class="card-content">未完待续：未来的每一天，都想和你一起度过...Every moment counts.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 爱心桥 内容区（占位） -->
+    <section id="bridge" class="section">爱心桥 待完成哦qwq</section>
+
+    <!-- ========== 新增：告白墙 内容区 ========== -->
+    <section id="confession" class="section">
+        <div class="confession-wall">
+            <h3 class="confession-title">致我最爱的酶酶</h3>
+            <div class="confession-content">
+                这是我们在一起度过的第一个 Valentine’s Day，以后还有 +∞个哦！（这是固定开头呀）（不过宝宝上次写的是渡过呀，错别字哦）（怎么办木马最开始写成了 Valentines’ Day ）又是什么巧合呀，猜猜今天是我们相遇多少天捏？答案是 167days 哦！（这是木马手算的呢！会不会算错了呢，应该不会的）也是我们相爱的第 75 天。
+
+                今天是一个约定俗成的表达爱的日子，但其实我们在一起（不论身体在不在一起，心永远在一起呀）的每一分每一秒都是沐浴在爱里面的哦。我们的爱将会一直 expand 直到 forever……
+
+                宝宝在离木马遥远的地方过得怎么样呢，肯定很开心呀。宝宝尽兴地玩哦，以后也要一直开心呀！（痒痒怎么办捏）
+
+                下面就让木马像记流水账一样记叙一下完成（其实还木完成，还差一个版块哦）这个情人节惊喜的过程吧：
+
+                木马很早就开始构思到底怎么去做这个 surprise 了（疑似至少 2 个月前吧，已经无从考证了，看来以后木马要记录哦！）。但是木马一时半会没想到到底要做什么，后来做一个 website 这样一个新奇（novel）的想法就萌生了，也说不上来到底是怎么想到的，也许那个 cjycup 无形之中给了我灵感，并且还想到 2.14 那一天我们相隔千里，所以一定要是线上的 surprise。然后就开始着手准备了。编写网站（html 编程语言，拓展一下哦：全称超文本标记语言 ——HyperText Markup Language）是木马从没干过的事（还记得木马说现学吗？），于是找到了 AI（当然 AI 知识负责帮我写代码，也就是实现 ideas，所有的创意当然都来自木马哦，AI 当然无法替木马爱你！）。甚至 AI 听完我的 prompt 都表扬木马很有创意呢（想附张图片但不会。。。）。
+
+                木马先去学怎么建网站（之前听 tle 说过），然后发现很复杂而且要花钱买域名和服务器。木马就开始构思域名，比如xcylovesgzr.com（诡异哦）。最后卡在了部署服务器上面，就询问了 tle。他说超级超级非常难，然后让我用他的，但木马不想让诡异的被看见 + 不想用别人的就拒绝了，于是另寻他法。终于在很多次查询、搜索后从豆包那里问出来了 github 这个好东西！！！功夫不负有心 “马” 哦（嘿嘿）。
+
+                最开始木马发现了一个建站的集成式 AI（叫做 wegic），可直接生成网站 + 免费 7 天的指定域名，看起来很强。于是木马下了全部心血并且花费了 2.99。但就在木马修改、添加功能时，告诉我：免费点数已用完，接下来就该付费了（最少），于是发生了那天晚上那一幕。其实木马早就该知道不会有那么良心的东西，而且之前没注意到点数这个东西。其实木马差一点就要付钱了，但是木马没有银行卡哦（只支持银行卡）。木马近乎崩溃：所有心血和时间全部白费，且这个 ai 是很强的，生成的网站十分精美，而我用 ChatGPT 生成的就非常非常糖，木马当然想给宝宝呈现最精致的而不是粗制滥造的，所以不想放弃这个 wegic。于是乎，木马又捣鼓了半天 wegic，想的是爬取它生成的网页的源代码但发现被保护的很好（藏起来了）爬不到，还想换个账号重新生成，这样就能重置点数，木马再精打细算一下让一段 prompt 里面包含很多个要求，但是却发现无法退出登录（疑似就是为了防这种人的吧）。因此木马崩溃了，万念俱灰，一切只有重新开始，而且要的是精致的。但仔细想来，wegic 生成的那版其实也并没有完全白费，至少得到了一个 fancy 的范本供我参考。
+
+                木马接下来转战豆包了（豆包在做技术课期末作业时给木马留下了好印象，不像 ChatGPT 生成的那个糖东西，而 tle 用的 Gemini（一个 AI 的名字，但同时也是双子座的英文哦哦哦）需要 Google 账号，Google 账号又需要国外的手机号注册，木马没有 www）终于在木马细致的 prompt 的指引和范本的参考下，豆包给出的效果让木马非常非常满意！（好多废话：感觉其实也不能怪 ChatGPT，因为没给它范本）仿照之前的半成品的风格，木马又用 ChatGPT 生成了网页的背景图（就是那个旋转木马还有爱心的 patterns 呀），生成了飞来飞去的花花。（wegic 是整合式的 AI，所以可以独自完成文字生成、图片生成、网页编写并整合，但是现在就要靠木马了呀）包括点击鼠标（宝宝没有鼠标的话直接点屏幕就行哦）会飞爱心也是木马的小巧思哦（灵感应该来自于之前木马见过的一个网站点击鼠标会出现放烟花的粒子效果，嘿嘿，其实灵感来自于木马对宝宝的爱呀（ex 呢））。
+
+                但木马一直犯了一个低级错误（这个时间在陪宝宝聊天嗯呐）：完成任何一个项目都是从大到小，从整体到局部，先做内容再做细节，比如说应该先把主体内容做好在搞那些飞花、飞爱心、毛玻璃（发现了嘛？）、背景图那些的。这个木马本末倒置了，就导致主体做起来就生成的比较慢，再加上木马不会 html 怕弄出 bug 来（这几句话好抽象呀，困困的木马写的哦）。
+
+                最后这几天时间比较少 + 快到 ddl 了，木马就开始赶工（在微信里说到妈妈看到了好尬尬哦）。最后一天还有好多没弄完于是熬夜（现在：二稿）弄。年后木马想花更多时间学习而不是被电子设备控制呀（？这句话是哪来的，串台了吧，而且不想删哦），可能会少回宝宝呢。
+
+                完成这个惊喜（嗯对再说一遍现在还没完成）不知道花费了多久。无数个晚上，从最开始的构思到 wegic 到 B 站 上学怎么部署服务器到跟豆包对话到捣鼓 github 到调教（？terror）ChatGPT（想记录下来准备的过程）。最终可能有几十个小时吧（感觉不止呢）。感觉花了超级多木马的脑细胞。看来下次又要构思很久了呢，木马暂时用尽了 creativity 哦。其实有些东西可以更完善的，比如想加 BGM（会是什么捏？），比如想加更多小细节小巧思花里胡哨的有趣的东西，但时间有限就留了遗憾哦（那个爱心桥还没弄呢 www 没时间了）。这些花哨的东西实现起来真的很不容易（拿个看起来不花哨的东西举例子：比如那封小作文（其实是大作文）写完之后封装到网页里面搞 syntax 调格式什么的（全是木马现学）又花了将近一个小时），而且木马对 html 是零基础，完全是靠调教 AI + 自学能力 + 信竞基础来实现的，花了超级多的心血，但是结果是非常有意义的呀，为爱的人做一切都是值得的哦（worthy）！（统计：代码一共1200+行，50+KB，到后面每次都会让豆包卡卡）
+                
+                真的感觉我们俩超级超级幸运，在这么早就遇见了如此同频共振并要为对方付出一生的人。我们将一定会一直幸福的哦！
+
+                最后再来说一些煽情的话吧：（感觉必须要转换人称不然不够煽情哦）
+
+                每一个和你共度的瞬间，每一个日常的点点滴滴，都照亮了我的生活。有时候就只想和你挨在一起，其他什么也不干，这就已经感觉足够幸福了。我喜欢你的任何样子，喜欢听你分享日常的琐碎，喜欢和你一起规划未来的模样…… 或许我作为 bf 目前还不够完美，但我会用全部的温柔和耐心，守护你的每一个小情绪，陪你走过每一个春夏秋冬。愿我们的爱，像细水长流，温柔且坚定。无论未来有多少风雨，我都会牵着你的手，一起走下去。
+                 
+                <div class="custom-text1">
+                一稿（手写稿）于2026.02.13 20:53 (UTC+8) = 02.13 13:53 (UTC+1)
+                二稿于2026.02.14 01:33 (UTC+8) = 02.13 18:33 (UTC+1)
+                （nia 木马最开始写成了 2025 [Terror]）
+                三稿于2026.02.14 12:20 (UTC+8) = 02.14 05:20 (UTC+1)
+                终稿于2026.02.14 18:33 (UTC+8) = 02.14 11:33 (UTC+1)
+                永远永远爱你的木马
+                于成都
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 新增：便利贴 内容区 ========== -->
+    <section id="notes" class="notes-section">
+        <!-- 便利贴副标题 -->
+        <h2 class="notes-title">便利贴情话</h2>
+        
+        <!-- 便利贴1 -->
+        <div class="sticky-note">
+            <div class="sticky-content">
+nia想搞一些肉麻（好久没听这个词了）的话，疑似太肉麻了点，再等木马完善一下吧nia
+            </div>
+        </div>
+        <!-- 便利贴2 -->
+        <div class="sticky-note">
+            <div class="sticky-content">
+nia身无彩凤双飞翼，心有灵犀一点通。（？）山有木兮木有枝，心悦君兮君不知。
+            </div>
+        </div>
+        <!-- 便利贴3 -->
+        <div class="sticky-note">
+            <div class="sticky-content">
+你的小脾气我都喜欢，因为那是独一无二的你❤️
+            </div>
+        </div>
+        <!-- 便利贴4 -->
+        <div class="sticky-note">
+            <div class="sticky-content">
+想和你吃好多好多顿饭，走好多好多条路～
+            </div>
+        </div>
+        <!-- 便利贴5 -->
+        <div class="sticky-note">
+            <div class="sticky-content">
+nia
+            </div>
+        </div>
+        <!-- 便利贴6 -->
+        <div class="sticky-note">
+            <div class="sticky-content">
+我爱你，因为你是你💓
+            </div>
+        </div>
+        <!-- 便利贴7（新增） -->
+        <div class="sticky-note">
+            <div class="sticky-content">
+我的偏爱和例外，永远只给你一个人💖
+            </div>
+        </div>
+        <!-- 便利贴8（新增） -->
+        <div class="sticky-note">
+            <div class="sticky-content">
+和你在一起的每一天，都是甜甜的呀🍬
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>Made with ♥ for You</p>
+        <p class="copyright">© 2026 ROCKING HORSE & ENZYME</p>
+    </footer>
+
     <script>
-        // 点击发射爱心烟花功能
-        document.addEventListener('click', function(e) {
-            // 每次点击生成15个爱心
-            const heartCount = 15;
-            for (let i = 0; i < heartCount; i++) {
-                createHeart(e.clientX, e.clientY);
-            }
+        // ========== 新增：Loading动画逻辑 ==========
+        window.addEventListener('load', function() {
+            // 加载完成后，延迟1秒隐藏Loading（让动画完整展示）
+            setTimeout(() => {
+                const loadingScreen = document.querySelector('.loading-screen');
+                loadingScreen.style.opacity = 0;
+                // 透明度动画结束后，移除Loading容器
+                setTimeout(() => {
+                    loadingScreen.remove();
+                }, 500);
+            }, 1000); // 持续1秒左右，可调整这个数值（单位：毫秒）
         });
 
-        function createHeart(x, y) {
-            // 创建爱心元素
-            const heart = document.createElement('div');
-            heart.classList.add('heart');
+        // 平滑滚动逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            const anchorLinks = document.querySelectorAll('a[href^="#"]');
             
-            // 随机设置爱心的偏移方向和距离
-            const angle = Math.random() * Math.PI * 2; // 随机角度
-            const distance = Math.random() * 100 + 50; // 随机距离
-            const dx = Math.cos(angle) * distance;
-            const dy = Math.sin(angle) * distance;
-            
-            // 设置自定义属性，用于动画偏移
-            heart.style.setProperty('--x', `${dx}px`);
-            heart.style.setProperty('--y', `${dy}px`);
-            
-            // 设置爱心初始位置
-            heart.style.left = `${x - 10}px`;
-            heart.style.top = `${y - 10}px`;
-            
-            // 随机调整爱心大小
-            const size = Math.random() * 10 + 15;
-            heart.style.width = `${size}px`;
-            heart.style.height = `${size}px`;
-            
-            // 随机调整爱心颜色渐变
-            const color1 = getRandomColor();
-            const color2 = getRandomColor();
-            heart.style.background = `linear-gradient(45deg, ${color1}, ${color2})`;
-            
-            // 添加到页面
-            document.body.appendChild(heart);
-            
-            // 1.5秒后移除爱心，避免DOM堆积
-            setTimeout(() => {
-                heart.remove();
-            }, 1500);
-        }
+            anchorLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        const navbarHeight = 80;
+                        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+                        
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
 
-        // 生成随机的粉紫色系颜色
-        function getRandomColor() {
-            const colors = [
-                '#ff6b9e', '#ff87ab', '#ff9fcf', 
-                '#7d40a6', '#8b5fb8', '#9a79c7', 
-                '#c0a0e0', '#d0b8e8', '#e0d0f0'
+            // 爱心飘起效果逻辑
+            document.body.addEventListener('click', function(e) {
+                if (e.target.closest('.navbar') || e.target.closest('.timeline-card')) return;
+                
+                const heartCount = Math.floor(Math.random() * 3) + 4;
+                
+                for (let i = 0; i < heartCount; i++) {
+                    createHeart(e.clientX, e.clientY + window.pageYOffset);
+                }
+            });
+
+            function createHeart(x, y) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerText = '♥';
+                
+                const randomX = x + (Math.random() - 0.5) * 40;
+                const randomY = y + (Math.random() - 0.5) * 20;
+                
+                heart.style.left = `${randomX}px`;
+                heart.style.top = `${randomY}px`;
+                
+                const hue = 340 + Math.random() * 20; 
+                heart.style.color = `hsl(${hue}, 80%, 60%)`;
+                
+                heart.style.animationDuration = `${1 + Math.random()}s`;
+
+                document.body.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 2000);
+            }
+
+            // ========== 修复：点击卡片出现nia! 效果 ==========
+            const timelineCards = document.querySelectorAll('.timeline-card');
+            timelineCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // 阻止事件冒泡，避免触发爱心效果
+                    e.stopPropagation();
+                    // 创建nia!文字元素
+                    createNiaText(e.clientX, e.clientY);
+                });
+            });
+
+            function createNiaText(x, y) {
+                const niaText = document.createElement('div');
+                niaText.className = 'nia-text';
+                niaText.innerText = 'nia!';
+                
+                // 定位到鼠标点击位置（居中）
+                niaText.style.left = `${x}px`;
+                niaText.style.top = `${y}px`;
+                
+                // 随机微调位置，增加灵动性
+                const randomX = (Math.random() - 0.5) * 20;
+                const randomY = (Math.random() - 0.5) * 10;
+                niaText.style.transform = `translate(${randomX}px, ${randomY}px)`;
+                
+                // 随机颜色（粉色系）
+                const hue = 340 + Math.random() * 20;
+                niaText.style.color = `hsl(${hue}, 80%, 60%)`;
+                
+                document.body.appendChild(niaText);
+
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    niaText.remove();
+                }, 1000);
+            }
+
+            // 移除冲突的IntersectionObserver逻辑（改用CSS动画实现渐入）
+
+            // 花束飞过效果逻辑（优先flower1版本）
+            // 1. 替换为你的花束图片路径
+            const FLOWER_IMAGES = [
+                'images/flowers1.png', // 红玫瑰花束（高频）
+                'images/flowers2.png', // 粉紫玫瑰花束（低频）
+                'images/flowers3.png'  // 多彩花束（低频）
             ];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
+
+            // 2. 生成随机花束的函数（优先选flowers1）
+            function createFlyingFlower() {
+                const flower = document.createElement('img');
+                flower.className = 'flying-flower';
+                
+                // 核心修改：控制flowes1的出现概率（50%概率选flowers1）
+                let randomImg;
+                const randomNum = Math.random();
+                if (randomNum < 0.5) { // 50%概率选flowers1
+                    randomImg = FLOWER_IMAGES[0];
+                } else if (randomNum < 0.75) { // 25%概率选flowers2
+                    randomImg = FLOWER_IMAGES[1];
+                } else { // 25%概率选flowers3
+                    randomImg = FLOWER_IMAGES[2];
+                }
+                flower.src = randomImg;
+                
+                // 随机飞行方向
+                const isLeftToRight = Math.random() > 0.5;
+                
+                // 随机高度
+                const randomTop = `${Math.random() * 50 + 20}vh`;
+                flower.style.top = randomTop;
+                
+                // 随机大小
+                const randomScale = 0.7 + Math.random() * 0.3;
+                flower.style.setProperty('--scale', randomScale);
+                
+                // 随机上下偏移（斜向飞行）
+                const randomYOffset = `${(Math.random() - 0.5) * 100}px`;
+                flower.style.setProperty('--y-offset', randomYOffset);
+                
+                // 快速飞行（3~6秒飞过屏幕）
+                const animationName = isLeftToRight ? 'flyLeftToRight' : 'flyRightToLeft';
+                const animationDuration = `${3 + Math.random() * 3}s`;
+                
+                // 只保留飞行动画（已整合浮动效果）
+                flower.style.animation = `${animationName} ${animationDuration} linear forwards`;
+                
+                document.body.appendChild(flower);
+                
+                // 动画结束后移除
+                setTimeout(() => {
+                    flower.remove();
+                }, parseFloat(animationDuration) * 1000);
+            }
+
+            // 3. 高频生成花束（0.5秒启动，2.5~5秒生成一朵）
+            setTimeout(createFlyingFlower, 500);
+            setInterval(() => {
+                createFlyingFlower();
+            }, Math.random() * 2500 + 2500);
+        });
     </script>
 </body>
 </html>
